@@ -17,7 +17,10 @@ Signed data uses `signed` declarations. Flat buses so no SystemVerilog arrays.
 | `systolic_controller`, `systolic_accelerator_top` | Harshil |
 
 ## processing_element (Abhishek)
-Code in `project.md` section 9.2. Params `DATA_WIDTH=8`, `ACC_WIDTH=32`.
+Params `DATA_WIDTH=8`, `ACC_WIDTH=32`. Behavior, on each posedge:
+- `reset || clear`: `a_out, b_out, valid_a_out, valid_b_out, acc` <= 0.
+- else: `a_out<=a_in`, `b_out<=b_in`, valid outs <= valid ins. `acc <= acc + a_in*b_in` only if `valid_a_in && valid_b_in`.
+- Product is signed 16-bit. Forwarding always runs, even if only one valid is high.
 ```
 in  clk, reset, clear
 in  signed [7:0] a_in, b_in
