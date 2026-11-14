@@ -13,7 +13,7 @@ Signed data uses `signed` declarations. Flat buses so no SystemVerilog arrays.
 |---|---|
 | `processing_element`, `mac_unit` | Abhishek |
 | `systolic_array_3x3` | Sushant |
-| `input_buffer`, `input_scheduler`, `output_registers` | Piyush |
+| `input_buffer`, `input_scheduler`, `output_registers`, `tb_input_scheduler` | Piyush |
 | `systolic_controller`, `systolic_accelerator_top` | Harshil |
 
 ## processing_element (Abhishek)
