@@ -1,0 +1,8 @@
+# Keep Unix line endings on Windows checkouts, so Git Bash can run the
+# scripts and regenerated vectors do not show up as modified.
+*.sh  text eol=lf
+*.py  text eol=lf
+*.hex text eol=lf
+*.txt text eol=lf
+*.pdf binary
+*.png binary
