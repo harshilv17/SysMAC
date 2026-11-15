@@ -143,10 +143,12 @@ for tb in tb/tb_*.v; do
     [ "$name" = tb_matmul_vectors ] && continue
     case "$name" in *"$FILTER"*) run "$name" "$tb" ;; esac
 done
-case "tb_matmul_vectors_seq" in *"$FILTER"*)
-    run tb_matmul_vectors_seq tb/tb_matmul_vectors.v ;; esac
-case "tb_matmul_vectors_systolic_top" in *"$FILTER"*)
-    run tb_matmul_vectors_systolic_top tb/tb_matmul_vectors.v -DSYSTOLIC ;; esac
+if [ -f tb/tb_matmul_vectors.v ]; then
+    case "tb_matmul_vectors_seq" in *"$FILTER"*)
+        run tb_matmul_vectors_seq tb/tb_matmul_vectors.v ;; esac
+    case "tb_matmul_vectors_systolic_top" in *"$FILTER"*)
+        run tb_matmul_vectors_systolic_top tb/tb_matmul_vectors.v -DSYSTOLIC ;; esac
+fi
 
 if [ $RAN -eq 0 ]; then
     echo "no testbench matches \"$FILTER\""
