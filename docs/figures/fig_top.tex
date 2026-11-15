@@ -1,0 +1,49 @@
+% SysMAC top level (systolic_accelerator_top). Solid arrows: data.
+% Dashed arrows: control from systolic_controller.
+\begin{tikzpicture}[font=\footnotesize, >=Latex,
+    blk/.style={draw, line width=0.6pt, minimum height=9mm, minimum width=21mm,
+                align=center, fill=white},
+    dat/.style={->, line width=0.9pt},
+    ctl/.style={->, densely dashed, line width=0.5pt},
+    lab/.style={font=\scriptsize, inner sep=1.5pt}]
+
+  \node[blk, minimum height=36mm] (buf) at (0,0) {input\_buffer\\[2pt]A, B\\latched\\on load};
+  \node[blk, minimum height=36mm] (sch) at (3.7,0) {input\_\\scheduler\\[2pt](skew)};
+  \node[blk, minimum height=36mm, minimum width=30mm] (arr) at (8.0,0) {};
+  \node[blk, minimum height=36mm] (out) at (12.3,0) {output\_\\registers\\[2pt]C, $9\times32$};
+  \node[blk, minimum width=96mm] (ctrl) at (6.15,-3.6) {systolic\_controller \quad IDLE, LOAD, COMPUTE, CAPTURE, DONE};
+
+  \foreach \i in {0,1,2} {
+    \foreach \j in {0,1,2} {
+      \node[draw, fill=black!10, minimum size=5.5mm, inner sep=0pt, font=\tiny]
+        (pe\i\j) at ($(arr.center)+(-0.85+0.85*\j, 1.12-0.85*\i)$) {PE};
+    }
+  }
+  \foreach \i in {0,1,2} {
+    \draw[->, line width=0.3pt] (pe\i0) -- (pe\i1);
+    \draw[->, line width=0.3pt] (pe\i1) -- (pe\i2);
+    \draw[->, line width=0.3pt] (pe0\i) -- (pe1\i);
+    \draw[->, line width=0.3pt] (pe1\i) -- (pe2\i);
+  }
+  \node[lab, anchor=north] at ($(arr.south)+(0,0.5)$) {systolic\_array\_3x3};
+
+  % host side
+  \draw[dat] ($(buf.west)+(-1.6,0.7)$) -- node[lab, above] {a\_flat [71:0]} ($(buf.west)+(0,0.7)$);
+  \draw[dat] ($(buf.west)+(-1.6,-0.7)$) -- node[lab, above] {b\_flat [71:0]} ($(buf.west)+(0,-0.7)$);
+  \draw[dat] (out.east) -- node[lab, above] {c\_flat} node[lab, below] {[287:0]} ++(1.4,0);
+
+  % data path
+  \draw[dat] ($(buf.east)+(0,0.7)$) -- node[lab, above] {a\_mat} ($(sch.west)+(0,0.7)$);
+  \draw[dat] ($(buf.east)+(0,-0.7)$) -- node[lab, above] {b\_mat} ($(sch.west)+(0,-0.7)$);
+  \draw[dat] (sch.east) -- node[lab, above] {a\_in\_flat} node[lab, below] {valid\_a\_in} (arr.west);
+  \draw[dat] ($(sch.north)+(0.4,0)$) -- ++(0,0.55) -| node[lab, above, pos=0.25] {b\_in\_flat, valid\_b\_in} (arr.north);
+  \draw[dat] (arr.east) -- node[lab, above] {c\_flat} node[lab, below] {(acc)} (out.west);
+
+  % control
+  \draw[ctl] (ctrl.north -| buf.south) -- node[lab, right] {load} (buf.south);
+  \draw[ctl] (ctrl.north -| sch.south) -- node[lab, right] {run, $t$} (sch.south);
+  \draw[ctl] (ctrl.north -| arr.south) -- node[lab, right] {clear} (arr.south);
+  \draw[ctl] (ctrl.north -| out.south) -- node[lab, right] {capture} (out.south);
+  \draw[ctl] ($(ctrl.west)+(-1.2,0.18)$) -- node[lab, above] {start} ($(ctrl.west)+(0,0.18)$);
+  \draw[ctl, <-] ($(ctrl.west)+(-1.2,-0.18)$) -- node[lab, below] {done} ($(ctrl.west)+(0,-0.18)$);
+\end{tikzpicture}

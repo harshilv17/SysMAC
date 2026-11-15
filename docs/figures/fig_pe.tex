@@ -1,0 +1,47 @@
+% processing_element: four pass-through registers and one accumulator.
+\begin{tikzpicture}[font=\footnotesize, >=Latex,
+    reg/.style={draw, line width=0.6pt, minimum width=9mm, minimum height=6mm, fill=black!10},
+    sreg/.style={draw, line width=0.6pt, minimum width=9mm, minimum height=4mm, fill=black!10, font=\tiny},
+    op/.style={draw, circle, line width=0.6pt, minimum size=6mm, inner sep=0pt},
+    w/.style={->, line width=0.7pt},
+    v/.style={->, densely dashed, line width=0.6pt},
+    lab/.style={font=\scriptsize, inner sep=1.5pt}]
+
+  \draw[line width=0.6pt, rounded corners=1pt] (-2.3,-3.3) rectangle (3.6,2.5);
+
+  % a and valid_a, left to right
+  \node[sreg] (rva) at (2.3, 2.0) {reg};
+  \node[reg]  (ra)  at (2.3, 1.2) {reg};
+  \draw[v] (-3.4,2.0) node[lab, left] {valid\_a\_in} -- (rva.west);
+  \draw[v] (rva.east) -- (4.6,2.0) node[lab, right] {valid\_a\_out};
+  \draw[w] (-3.4,1.2) node[lab, left] {a\_in} -- (ra.west);
+  \draw[w] (ra.east) -- (4.6,1.2) node[lab, right] {a\_out};
+
+  % b and valid_b, top to bottom
+  \node[reg]  (rb)  at (-1.1,-2.5) {reg};
+  \node[sreg, rotate=90] (rvb) at (-1.9,-2.5) {reg};
+  \draw[w] (-1.1,3.5) node[lab, above] {b\_in} -- (rb.north);
+  \draw[w] (rb.south) -- (-1.1,-4.3) node[lab, below] {b\_out};
+  \draw[v] (-1.9,3.5) node[lab, above left] {valid\_b\_in} -- (rvb.east);
+  \draw[v] (rvb.west) -- (-1.9,-4.3) node[lab, below left] {valid\_b\_out};
+
+  % MAC
+  \node[op] (mul) at (0.3, 0.1) {$\times$};
+  \node[op] (add) at (1.5, 0.1) {$+$};
+  \node[reg, minimum width=11mm] (acc) at (1.5,-1.4) {acc};
+  \node[op, minimum size=5mm, font=\tiny] (and) at (0.0,-1.4) {AND};
+  \draw[w] (0.3,1.2) -- (mul.north);  \fill (0.3,1.2) circle (1.1pt);
+  \draw[w] (-1.1,0.1) -- (mul.west);  \fill (-1.1,0.1) circle (1.1pt);
+  \draw[w] (mul.east) -- node[lab, above] {16} (add.west);
+  \draw[w] (add.south) -- node[lab, right] {32} (acc.north);
+  \draw[w] (acc.east) -- ++(0.9,0) |- (add.east);
+  \draw[w] (acc.south) -- ++(0,-0.75) -- ++(3.1,0) node[lab, right] {acc [31:0]};
+
+  % accumulate enable
+  \draw[v] (-0.6,2.0) |- ($(and.west)+(0,0.12)$);   \fill (-0.6,2.0) circle (1.1pt);
+  \draw[v] (-1.9,-1.53) -- ($(and.west)+(0,-0.12)$); \fill (-1.9,-1.53) circle (1.1pt);
+  \draw[v] (and.east) -- node[lab, below] {en} (acc.west);
+
+  \draw[densely dotted, line width=0.5pt] (-0.35,-0.55) rectangle (2.95,0.75);
+  \node[lab, anchor=south west] at (2.0,-0.55) {MAC};
+\end{tikzpicture}

@@ -1,0 +1,52 @@
+% 3 x 3 array with the skewed input streams drawn as a staircase.
+% The element nearest the array enters first. Empty slots are zeros with
+% valid low.
+\begin{tikzpicture}[font=\scriptsize, >=Latex, x=1.25cm, y=1.25cm,
+    pe/.style={draw, line width=0.6pt, minimum size=8.5mm, fill=black!10, align=center,
+               inner sep=0pt, font=\tiny},
+    tok/.style={draw, line width=0.4pt, minimum size=4.8mm, inner sep=0pt, font=\tiny},
+    gap/.style={draw, densely dotted, line width=0.4pt, minimum size=4.8mm, inner sep=0pt,
+                font=\tiny, text=black!55},
+    w/.style={->, line width=0.6pt}]
+
+  \foreach \i in {0,1,2} {
+    \foreach \j in {0,1,2} {
+      \node[pe] (p\i\j) at (\j,-\i) {PE(\i,\j)\\$c_{\i\j}$};
+    }
+  }
+  \foreach \i in {0,1,2} {
+    \draw[w] (p\i0) -- (p\i1);
+    \draw[w] (p\i1) -- (p\i2);
+    \draw[w] (p0\i) -- (p1\i);
+    \draw[w] (p1\i) -- (p2\i);
+  }
+
+  % A streams on the left: row i has i empty slots before its first element
+  \foreach \i in {0,1,2} {
+    \foreach \s in {0,1,2,3,4} {
+      \pgfmathtruncatemacro{\k}{\s-\i}
+      \ifnum\k<0
+        \node[gap] (a\i\s) at (-0.95-0.42*\s,-\i) {0};
+      \else\ifnum\k<3
+        \node[tok] (a\i\s) at (-0.95-0.42*\s,-\i) {$a_{\i\k}$};
+      \fi\fi
+    }
+    \draw[w] (a\i0) -- (p\i0);
+  }
+
+  % B streams on the top: column j has j empty slots before its first element
+  \foreach \j in {0,1,2} {
+    \foreach \s in {0,1,2,3,4} {
+      \pgfmathtruncatemacro{\k}{\s-\j}
+      \ifnum\k<0
+        \node[gap] (b\j\s) at (\j,0.95+0.42*\s) {0};
+      \else\ifnum\k<3
+        \node[tok] (b\j\s) at (\j,0.95+0.42*\s) {$b_{\k\j}$};
+      \fi\fi
+    }
+    \draw[w] (b\j0) -- (p0\j);
+  }
+
+  \node[anchor=east, font=\scriptsize] at (-0.75,0.55) {A moves right};
+  \node[anchor=west, font=\scriptsize] at (2.45,1.2) {B moves down};
+\end{tikzpicture}
