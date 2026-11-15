@@ -1,0 +1,24 @@
+% systolic_controller state machine. Outputs are Moore: each depends only on the state.
+\begin{tikzpicture}[font=\footnotesize, >=Latex,
+    st/.style={draw, line width=0.6pt, rounded corners=3mm, minimum width=19mm,
+               minimum height=10mm, align=center, fill=white},
+    tr/.style={->, line width=0.6pt},
+    lab/.style={font=\scriptsize, inner sep=2pt, align=center}]
+
+  \node[st] (idle) at (0,0)      {IDLE\\[-1pt]{\scriptsize all low}};
+  \node[st] (load) at (3.6,0)    {LOAD\\[-1pt]{\scriptsize load, clear}};
+  \node[st] (comp) at (3.6,-2.5) {COMPUTE\\[-1pt]{\scriptsize run}};
+  \node[st] (cap)  at (0,-2.5)   {CAPTURE\\[-1pt]{\scriptsize capture}};
+  \node[st] (done) at (-3.0,-1.25) {DONE\\[-1pt]{\scriptsize done}};
+
+  \draw[tr] (idle) -- node[lab, above] {start} (load);
+  \draw[tr] (load) -- node[lab, right] {$t \leftarrow 0$} (comp);
+  \draw[tr] (comp) -- node[lab, below] {$t = 6$} (cap);
+  \draw[tr] (cap)  -- (done);
+  \draw[tr] (done) -- (idle);
+  \draw[tr] (comp) edge[loop right, looseness=5] node[lab, right] {$t < 6$\\$t \leftarrow t{+}1$} (comp);
+  \draw[tr] (idle) edge[loop above, looseness=5] node[lab, above] {no start} (idle);
+
+  \node[lab, anchor=north] at (0.3,-3.4)
+    {1 LOAD + 7 COMPUTE + 1 CAPTURE + 1 DONE. A start while not in IDLE is ignored.};
+\end{tikzpicture}
