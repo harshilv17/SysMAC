@@ -98,9 +98,8 @@ the same vectors.
 | Sequential baseline | 27 | 29 | 1 |
 
 The ratio is in cycles only. Clock frequency and FPGA resources for both come
-from synthesis. The systolic figures are the design values from the spec until
-`systolic_accelerator_top` is integrated and measured; the baseline figures are
-measured. Both designs guarantee `c_flat` only while `done` is high: the
+from synthesis. Both rows are measured by `tb_matmul_vectors.v` on the
+integrated design (112 jobs each). Both designs guarantee `c_flat` only while `done` is high: the
 baseline rewrites it during the next job, while the systolic top keeps the old
 result until its next capture.
 
