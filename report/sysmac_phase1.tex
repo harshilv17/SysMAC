@@ -8,6 +8,14 @@
 
 \newcommand{\code}[1]{\texttt{#1}}
 
+% IEEEtran writes ``Abstract'' followed by an em dash; use a colon instead.
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd{\abstract}{---}{:\ }{}{}
+\patchcmd{\abstract}{---}{:\ }{}{}
+\patchcmd{\abstract}{---}{:\ }{}{}
+\makeatother
+
 \begin{document}
 
 \title{SysMAC: A Verified $3 \times 3$ Output-Stationary\\Systolic Array for Signed 8-bit Matrix Multiplication}
