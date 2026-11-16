@@ -5,7 +5,7 @@
 Modern Computer Architecture, B.Tech (CS&AI), Project 12.
 
 - Phase I report: `report/sysmac_phase1.pdf`
-- Prototype video: ADD LINK
+- Prototype video: https://drive.google.com/drive/folders/1R3c7u3mTEjUZaHcT-eIhnQrd_gHrLYgV?usp=sharing
 - Interface: [`docs/port_spec.md`](docs/port_spec.md)
 
 ## How it works
