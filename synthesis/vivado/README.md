@@ -29,11 +29,11 @@ This design cannot be run in Vivado on Apple Silicon. Options, best first:
 From the repository root:
 
 ```
-vivado -mode batch -source synthesis/vivado/ooc.tcl -tclargs systolic_accelerator_top 8.0
-vivado -mode batch -source synthesis/vivado/ooc.tcl -tclargs seq_matmul 8.0
+vivado -mode batch -nojournal -nolog -source synthesis/vivado/ooc.tcl -tclargs 10.0
 ```
 
-Read `fmax.txt`. If WNS is large and positive, rerun with a smaller period
+This runs both designs in one session and writes `summary.txt` plus the full
+reports per design. Read `summary.txt` and each `fmax.txt`. If WNS is large and positive, rerun with a smaller period
 (Vivado stops optimising once timing is met). If WNS is negative, rerun with
 a larger period. Report the part, speed grade, Vivado version and period with
 every number.
@@ -45,3 +45,11 @@ The top has 436 port bits; an xc7a35t has 106 user I/O (cpg236) or 210
 paths are not timed; register-to-register paths, including each PE's
 multiply-add, are. The power report has no I/O power and uses default
 switching activity, so treat it as an estimate.
+
+## What to look at in timing.rpt
+
+Our longest logic path (Yosys, 85 gate levels) starts at the controller's
+`t`, goes through the scheduler's index arithmetic and operand select, and
+ends in an edge PE's multiply-add. Check whether Vivado reports the same
+worst path. If it does, registering the scheduler outputs is the obvious
+way to raise Fmax.
