@@ -1,0 +1,338 @@
+\documentclass[conference]{IEEEtran}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,calc,positioning}
+\usepackage[hidelinks]{hyperref}
+
+\newcommand{\code}[1]{\texttt{#1}}
+
+% IEEEtran writes ``Abstract'' followed by an em dash; use a colon instead.
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd{\abstract}{---}{:\ }{}{}
+\patchcmd{\abstract}{---}{:\ }{}{}
+\patchcmd{\abstract}{---}{:\ }{}{}
+\makeatother
+
+\begin{document}
+
+\title{SysMAC: A Verified $3 \times 3$ Output-Stationary\\Systolic Array for Signed 8-bit Matrix Multiplication}
+
+\author{\IEEEauthorblockN{Abhishek Rana, Harshil Valecha, Sushant Yadav, Piyush, and Priyanshu Tomar}}
+
+\maketitle
+
+\begin{abstract}
+This paper describes the design, verification and evaluation of SysMAC, a $3 \times 3$ output-stationary systolic array that multiplies signed 8-bit matrices with 32-bit accumulation, written in Verilog-2001. Rows of one matrix and columns of the other enter the array with a one-cycle skew per row and column, so each cell receives matching operand pairs, and a five-state controller sequences loading, a seven-cycle compute phase and result capture. One multiplication takes 10 clock cycles from start to done, and with back-to-back requests the array completes one every 11 cycles. A sequential design with a single multiply-accumulate unit and the same interface needs 29 and 30 cycles respectively, but the array uses nine multipliers to achieve this and only 42.9\% of its cell-cycles do useful work. Correctness is checked against an independent register-level Python model: all nine testbenches pass, and a mutation check that plants twelve realistic design errors one at a time finds every one; it also exposed a controller error that no testbench caught before. Open-source synthesis maps the array to 9 DSP blocks; its longest logic path runs from the controller through the input scheduler into a processing element. We relate the design to current work on fast inner products, machine-discovered matrix multiplication algorithms and structured sparsity, and show which of these ideas pay off at this size.
+\end{abstract}
+
+% ======================================================================
+\section{Introduction}
+
+The product $C = AB$ of two $N \times N$ matrices is
+\begin{equation}
+c_{ij} = \sum_{k=0}^{N-1} a_{ik}\, b_{kj},
+\label{eq:matmul}
+\end{equation}
+which requires $N^3$ multiply-accumulate (MAC) operations. A fully connected neural network layer is one such product, and a convolution can be rewritten as one. A general-purpose processor evaluates \eqref{eq:matmul} with three nested loops and a single multiplier, fetching both operands for every MAC.
+
+A systolic array replaces the loops with a grid of identical cells. Operands enter at the edges and move one cell per clock cycle, so each value fetched is reused by every cell it passes. This paper describes the design, verification and evaluation of a small array of this kind. Our contributions are:
+\begin{itemize}
+\item a modular, synthesisable $3 \times 3$ output-stationary array with a frozen, documented interface;
+\item an exact timing analysis, confirmed in simulation and cross-checked against a published closed-form model;
+\item a sequential baseline with an identical interface, so both designs run under the same tests;
+\item a verification flow built on an independent register-level model, with a reproducible mutation check that measures how well the tests detect real design errors;
+\item an analysis of which current research directions in matrix-multiplication hardware help at this scale.
+\end{itemize}
+
+Section~\ref{sec:lit} reviews related work, Section~\ref{sec:design} presents the design and the verification method, Section~\ref{sec:results} reports and discusses the results, and Section~\ref{sec:conc} concludes.
+
+% ======================================================================
+\section{Literature Review}
+\label{sec:lit}
+
+\subsection{Systolic arrays}
+Kung and Leiserson introduced systolic arrays as special-purpose VLSI systems built from a few types of simple cells with regular, local connections~\cite{kung1978}. Their matrix multiplier is a hexagonally connected array for band matrices; we cite it for the concept rather than for the rectangular mesh used here. Kung later stated the central argument for the approach~\cite{kung1982}: because each input is used many times inside the array, the computation rate can be high while the input and output bandwidth stays modest.
+
+\subsection{Systolic arrays in machine learning}
+The Tensor Processing Unit (TPU) of Jouppi \emph{et al.}~\cite{jouppi2017} brought systolic arrays into production. Its matrix unit contains $256 \times 256$ MACs performing 8-bit multiply-and-adds; activations enter from the left, weights are loaded from the top, and 16-bit products are summed in 32-bit accumulators below the array. Current Google TPUs still use systolic matrix units: $128 \times 128$ up to v5p and $256 \times 256$ in v6e and TPU7x~\cite{tpudocs}. Jacob \emph{et al.}~\cite{jacob2018} show that networks can be trained for integer-only inference with 8-bit operands and 32-bit accumulation, the widths SysMAC uses.
+
+\subsection{Dataflow and utilisation}
+Chen, Emer and Sze~\cite{eyeriss2016} classify accelerators by the data that stays fixed inside a processing element: weight stationary, output stationary or no local reuse; Sze \emph{et al.}~\cite{sze2017} survey these choices. Samajdar \emph{et al.} apply the classification to systolic arrays~\cite{scalesim2018} and derive a closed-form runtime for one fold of the array~\cite{scalesim2020}, which we use in Section~\ref{sec:timing}. Their later version~\cite{scalesim3} reports that a $32 \times 32$ array can be $2.86\times$ more energy-efficient than a $128 \times 128$ one because of utilisation. Gemmini~\cite{gemmini2021} supports both output- and weight-stationary dataflows with a clean separation between the processing element and the mesh, which we follow.
+
+\subsection{Current directions in matrix-multiplication hardware}
+\emph{Fewer multiplications per inner product.} Winograd's 1968 identity~\cite{winograd1968} computes a pair of products with one multiplication of two sums, plus correction terms that depend on one matrix only. Pogue and Nicolici~\cite{pogue2024} build this into systolic arrays (FIP and FFIP): one processing element with two pre-adders and a $(w{+}1)$-bit multiplier replaces two baseline ones, reaching the same throughput with about half the MAC units at large array sizes, at the cost of a longer critical path that their FFIP variant recovers.
+
+\emph{Machine-discovered algorithms.} AlphaTensor~\cite{alphatensor} found a 47-multiplication scheme for $4 \times 4$ matrices in arithmetic modulo 2, and AlphaEvolve~\cite{alphaevolve} a 48-multiplication scheme for complex $4 \times 4$ matrices. For $3 \times 3$, neither improves Laderman's 23 multiplications~\cite{laderman1976}.
+
+\emph{Sparsity and number formats.} NVIDIA's 2:4 structured sparsity~\cite{mishra2021} and S2TA~\cite{s2ta} skip zero weights with small multiplexers in front of each MAC. The OCP microscaling formats~\cite{ocpmx} share one power-of-two scale across blocks of 32 elements.
+
+\subsection{Position of this work}
+These systems are large and target long inner products. A $3 \times 3$ array cannot compete in throughput. Our aim is a small design in which every architectural claim is stated precisely and checked in simulation, and an honest assessment of which of the ideas above apply at this size (Section~\ref{sec:discussion}).
+
+% ======================================================================
+\section{Proposed Solution}
+\label{sec:design}
+
+\subsection{Specification}
+Table~\ref{tab:spec} summarises the design. All module interfaces were fixed in a shared port specification before implementation, so the modules could be developed and tested independently.
+
+\begin{table}[t]
+\caption{Design specification}
+\label{tab:spec}
+\centering
+\begin{tabular}{@{}ll@{}}
+\toprule
+Parameter & Value \\
+\midrule
+Array size & $3 \times 3$ (array module parameterised in $N$) \\
+Operands & signed, 8 bits \\
+Accumulators & signed, 32 bits \\
+Dataflow & output stationary \\
+Input & $A$ and $B$ in parallel, 72 bits each \\
+Output & all nine results in parallel, 288 bits \\
+Packing & row major, element $(i,k)$ at bits $8(3i+k)$ upward \\
+Clock and reset & single clock, synchronous active-high reset \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Architecture}
+Fig.~\ref{fig:top} shows the top level. When \code{start} is asserted, the input buffer latches both matrices and the array is cleared. The input scheduler then feeds the array for seven cycles, after which the output registers capture all nine accumulators and hold them while the array is cleared for the next multiplication.
+
+\begin{figure*}[t]
+\centering
+\resizebox{0.86\textwidth}{!}{\input{../docs/figures/fig_top.tex}}
+\caption{SysMAC top level. Solid arrows carry data; dashed arrows carry control signals from the controller.}
+\label{fig:top}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\resizebox{0.9\textwidth}{!}{\input{../docs/figures/fig_wavefront.tex}}
+\caption{Active cells in each compute cycle, with the index $k$ of the product each cell is computing.}
+\label{fig:wave}
+\end{figure*}
+
+\subsubsection{Processing element}
+Each cell (Fig.~\ref{fig:pe}) registers its two operands and their valid flags and forwards them to its right and lower neighbours. It adds the 16-bit product to its 32-bit accumulator only when both incoming valid flags are set. A \code{clear} signal, asserted while the matrices are loaded, resets every register in the cell.
+
+\begin{figure}[t]
+\centering
+\resizebox{0.8\columnwidth}{!}{\input{../docs/figures/fig_pe.tex}}
+\caption{Processing element.}
+\label{fig:pe}
+\end{figure}
+
+\subsubsection{Input skew}
+Cell $(i,j)$ must receive $a_{ik}$ and $b_{kj}$ in the same cycle. A value entering row $i$ takes $j$ cycles to reach column $j$, and a value entering column $j$ takes $i$ cycles to reach row $i$. Delaying row $i$ by $i$ cycles and column $j$ by $j$ cycles aligns the pairs (Fig.~\ref{fig:array}). At compute cycle $t$ the scheduler drives
+\begin{equation}
+\text{row } i:\; a_{i,\,t-i}, \qquad \text{column } j:\; b_{\,t-j,\,j},
+\label{eq:skew}
+\end{equation}
+when the index lies in $\{0, 1, 2\}$, and zero with the valid flag cleared otherwise. The scheduler is combinational and is the only block that applies skew; the controller supplies an enable and the cycle counter $t$.
+
+\begin{figure}[t]
+\centering
+\resizebox{0.88\columnwidth}{!}{\input{../docs/figures/fig_array.tex}}
+\caption{The array and its skewed input streams. The element nearest the array enters first; dotted slots are zeros with the valid flag cleared.}
+\label{fig:array}
+\end{figure}
+
+\subsubsection{Controller}
+The controller is a five-state Moore machine (Fig.~\ref{fig:fsm}). LOAD latches the inputs and clears the array in one cycle, and COMPUTE lasts seven cycles. CAPTURE is needed because the final product is added on the clock edge that ends COMPUTE, so the accumulators are complete only one cycle later. DONE asserts \code{done} for one cycle. A \code{start} outside IDLE is ignored. Fig.~\ref{fig:timing} shows one multiplication.
+
+\begin{figure}[t]
+\centering
+\resizebox{0.85\columnwidth}{!}{\input{../docs/figures/fig_fsm.tex}}
+\caption{Controller state machine and its outputs.}
+\label{fig:fsm}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\resizebox{\columnwidth}{!}{\input{../docs/figures/fig_timing.tex}}
+\caption{One multiplication. Edge 1 samples \code{start}; \code{done} and the result are visible after edge 10.}
+\label{fig:timing}
+\end{figure}
+
+\subsection{Timing analysis}
+\label{sec:timing}
+From \eqref{eq:skew}, cell $(i,j)$ computes its $k$-th product at
+\begin{equation}
+t = i + j + k .
+\label{eq:when}
+\end{equation}
+The last product, at cell $(2,2)$ with $k = 2$, occurs at $t = 3(N-1) = 6$, so computing takes $3N - 2 = 7$ cycles and the active cells form a diagonal wavefront (Fig.~\ref{fig:wave}). We count latency from the edge that samples \code{start} to the edge after which \code{done} is visible:
+\begin{equation}
+L = 1 + 1 + (3N-2) + 1 = 3N + 1 = 10 \text{ cycles}
+\label{eq:lat}
+\end{equation}
+(sample, LOAD, COMPUTE, CAPTURE). SCALE-Sim gives one fold of an array as $2S_R + S_C + T - 2$ cycles~\cite{scalesim2020}, which is $4N - 2 = 10$ for $N = 3$: seven compute cycles plus three to shift results out through the bottom edge. SysMAC reads all accumulators in parallel, so the two agree once the readout method is accounted for.
+
+Only $N^3 = 27$ of the $N^2(3N-2) = 63$ cell-cycles do useful work, a utilisation of 42.9\%, because cells wait for the wavefront and idle after it passes.
+
+\subsection{Accumulator width}
+The product of largest magnitude is $(-128)^2 = 16\,384$, so the largest sum of three products is $49\,152$, which needs 17 signed bits; in general $B_{\min} = 2W + \lfloor \log_2 N \rfloor$ for $W$-bit operands, one bit fewer than the commonly quoted $2W + \lceil \log_2 N \rceil$ when $N$ is not a power of two. SysMAC uses 32 bits, following TPU and integer-inference practice~\cite{jouppi2017, jacob2018}.
+
+\subsection{Sequential baseline}
+The baseline evaluates \eqref{eq:matmul} with one MAC unit and three counters, one MAC per cycle. It has the same ports and handshake: sample, LOAD and 27 compute cycles give $N^3 + 2 = 29$ cycles in the convention of \eqref{eq:lat}.
+
+\subsection{Verification method}
+\label{sec:verif}
+\emph{Reference model.} An independent Python model contains three descriptions: the triple loop of \eqref{eq:matmul}, a register-level model of the array advanced one clock edge at a time with both valid flags, and the operation order of the baseline. It checks that they agree with each other and with NumPy on 1560 matrix pairs for $N \in \{2,3,4,5,8\}$, and that every cell is active exactly as \eqref{eq:when} predicts.
+
+\emph{Test data.} The model writes 112 cases (12 directed, 100 random): zeros, the identity on either side, all $-128$, all $127$, $-128$ against $127$, alternating signs, single corner elements, and an asymmetric pair that fails if $B$ is read transposed. For each case it also records the scheduler output and all accumulators after every clock edge.
+
+\emph{Testbenches.} One per level:
+\begin{enumerate}
+\item \emph{Units:} MAC unit and processing element: signs, valid flags, clear, reset.
+\item \emph{Scheduler and array:} scheduler outputs for $t = 0 \ldots 7$ and random matrices; the array against the model after every edge for $N = 3$ (all 112 cases), and final products for $N = 2$ and $4$.
+\item \emph{Controller:} state sequence, the seven values of $t$, one-cycle \code{done}.
+\item \emph{System:} directed, random and back-to-back jobs, exact latency, reset during a job. A vector testbench drives the 112 model cases into either design, changes the inputs right after LOAD to prove they are latched, and pulses \code{start} during COMPUTE, CAPTURE and DONE, which must all be ignored.
+\end{enumerate}
+
+\emph{Mutation check.} A passing test suite is evidence only if it fails on a wrong design. A script copies the repository, plants one realistic error, reruns every testbench, and records which ones fail. One script regenerates the vectors and runs all testbenches with Icarus Verilog 13.
+
+% ======================================================================
+\section{Results and Discussion}
+\label{sec:results}
+
+\subsection{Functional correctness}
+All nine testbench runs pass. The demonstration case $A = [[1,2,3],[4,5,6],[7,8,9]]$, $B = [[9,8,7],[6,5,4],[3,2,1]]$ gives $C = [[30,24,18],[84,69,54],[138,114,90]]$. Table~\ref{tab:trace} shows the accumulators of this job after each clock edge, taken from simulation: $c_{00}$ is complete after edge 5 ($t = 2$), while $c_{22}$ completes only on edge 9, which confirms \eqref{eq:when} and the need for the CAPTURE cycle.
+
+\begin{table}[t]
+\caption{Accumulators after each clock edge, demonstration job (simulation)}
+\label{tab:trace}
+\centering
+\footnotesize
+\begin{tabular}{@{}rlcl@{}}
+\toprule
+Edge & State & $t$ & $c_{00}\, c_{01}\, c_{02}\,/\,c_{10}\, c_{11}\, c_{12}\,/\,c_{20}\, c_{21}\, c_{22}$ \\
+\midrule
+3 & COMPUTE & 1 & 9 0 0 / 0 0 0 / 0 0 0 \\
+4 & COMPUTE & 2 & 21 8 0 / 36 0 0 / 0 0 0 \\
+5 & COMPUTE & 3 & 30 18 7 / 66 32 0 / 63 0 0 \\
+6 & COMPUTE & 4 & 30 24 15 / 84 57 28 / 111 56 0 \\
+7 & COMPUTE & 5 & 30 24 18 / 84 69 48 / 138 96 49 \\
+8 & COMPUTE & 6 & 30 24 18 / 84 69 54 / 138 114 81 \\
+9 & CAPTURE & 6 & 30 24 18 / 84 69 54 / 138 114 90 \\
+10 & DONE & 6 & result on \code{c\_flat}, \code{done} = 1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Strength of the tests}
+Table~\ref{tab:mut} lists the planted errors. All twelve real errors are detected, most by three or four testbenches. Two findings matter. First, a 16-bit accumulator is not detected by the processing-element testbench, whose sums stay within 16 bits; only the array and system tests catch it. Second, before this check, a controller that restarts when \code{start} arrives during CAPTURE or DONE passed every testbench; the vector testbench was extended to pulse \code{start} in those states. The one surviving change, output registers that copy every cycle, is allowed by the specification, since the result is only guaranteed while \code{done} is high.
+
+\begin{table}[t]
+\caption{Planted design errors and the testbenches that detect them}
+\label{tab:mut}
+\centering
+\footnotesize
+\begin{tabular}{@{}lp{0.42\columnwidth}@{}}
+\toprule
+Planted error & Detected by \\
+\midrule
+$B$ enters one cycle late & scheduler, system, demo, vector \\
+$B$ read transposed & scheduler, system, demo, vector \\
+unsigned multiplication & PE, array, system, vector \\
+accumulator wraps at 16 bits & array, system, vector \\
+clear does not reset the PE & PE, array, system, vector \\
+clear resets only the accumulator & PE \\
+PE ignores \code{valid\_b} & PE, array \\
+controller ends one cycle early & controller, system, demo, vector \\
+restart on \code{start} in CAPTURE & vector \\
+restart on \code{start} in DONE & vector \\
+input buffer does not latch & vector \\
+baseline does not restart its sum & vector (baseline) \\
+output registers copy every cycle & none (allowed by the spec) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Performance}
+Table~\ref{tab:perf} compares the two designs. Latency drops from 29 to 10 cycles ($2.9\times$). With \code{start} held high, the array completes a multiplication every 11 cycles and the baseline every 30, so throughput improves by $2.73\times$. The array pays for this with nine multipliers instead of one: per multiplier it is less busy (42.9\% against 100\%). Its real advantage is scaling: latency grows as $3N + 1$ for the array and $N^3 + 2$ for the baseline, so the cycle ratio is $5.1\times$ at $N = 4$ and $20.6\times$ at $N = 8$ (derived).
+
+\begin{table}[t]
+\caption{Systolic array and sequential baseline}
+\label{tab:perf}
+\centering
+\begin{tabular}{@{}lrr@{}}
+\toprule
+ & Systolic & Baseline \\
+\midrule
+Multipliers & 9 & 1 \\
+Latency, start to done (cycles) & 10 & 29 \\
+Throughput, cycles per job & 11 & 30 \\
+Multiplier utilisation & 42.9\% & 100\% \\
+DSP48E1 (Yosys) & 9 & 1 \\
+Flip-flops, hierarchical / flattened & 602 / 446 & 474 / 474 \\
+LUTs, hierarchical / flattened & 144 / 118 & 408 / 408 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Resources and timing}
+Yosys 0.71 \code{synth\_xilinx} reports no latches or structural problems. The flip-flop count depends on the flow: with module boundaries kept, every processing element keeps its forwarding registers, including those at the right and bottom edges that nothing reads (602); flattening removes them (446). The baseline needs more lookup tables than the array, because it selects one of nine operands every cycle. A longest-path analysis of the flattened netlist gives 85 gate levels from the controller's counter $t$, through the scheduler's index arithmetic and operand selection, into the multiply-add of an edge cell. The clock is therefore likely limited by the scheduler and the MAC together rather than by the MAC alone; registering the scheduler outputs would shorten this path for one cycle of latency. Clock frequency and power require Vivado; an out-of-context script is included in the repository, because the top's 436 port bits exceed the user I/O of small Artix-7 packages.
+
+\subsection{Discussion: what current research offers at this size}
+\label{sec:discussion}
+\emph{Utilisation.} Overlapping consecutive jobs hides fill and drain. If job $n$'s product $k$ reaches cell $(i,j)$ at $t = i + j + 3n + k$, $J$ jobs take $3J + 4$ compute cycles and utilisation becomes $3J/(3J+4)$: 75\% for $J = 4$ and 92.3\% for $J = 16$ (derived). This is the most direct improvement for SysMAC and needs a first/last tag that travels with the data.
+
+\emph{Fast inner products.} Applying Winograd's identity~\cite{winograd1968, pogue2024} with the inner dimension padded to four needs $9 \times 2$ pair products plus three row and three column corrections: 24 multiplications instead of 27, or 21 if the column terms are precomputed for fixed weights, and six compute cycles instead of seven (derived). The multipliers widen to $9 \times 9$, and the correction overhead grows with $N$ while the array grows with $N^2$, so the saving is small at $3 \times 3$ and grows for larger arrays, consistent with the large-array results in~\cite{pogue2024}.
+
+\emph{Machine-discovered algorithms.} The best known $3 \times 3$ scheme still uses 23 multiplications~\cite{laderman1976, alphaevolve}. Its operands are sums of up to seven matrix entries, which widens multipliers to about 11 bits and needs data from non-neighbouring cells; by a $w^2$ area estimate, 23 such multipliers cost more than 27 plain $8 \times 8$ ones (derived). These algorithms do not pay off in a small systolic array.
+
+\emph{Sparsity and formats.} With an inner dimension of three there is a single padded group of four, so 2:4 sparsity~\cite{mishra2021, s2ta} saves at most one cycle. MXINT8~\cite{ocpmx} would leave the integer array unchanged and add a shared exponent per output.
+
+\subsection{Limitations}
+Results come from RTL simulation and synthesis without timing; Fmax, power and on-board operation are not measured. The array is fixed at $3 \times 3$ at the top level, the parallel 436-bit interface is not realistic for a pin-limited FPGA, and the baseline is a simple counter-based datapath rather than a processor.
+
+% ======================================================================
+\section{Individual Contributions}
+\label{sec:contrib}
+\begin{center}
+\begin{tabular}{@{}lp{0.68\columnwidth}@{}}
+\toprule
+Member & Contribution \\
+\midrule
+Abhishek Rana & MAC unit and processing element, with their testbenches \\
+Harshil Valecha & Port specification, controller, top-level integration, controller, system and demonstration testbenches, repository and code review, prototype video \\
+Sushant Yadav & Parameterised $N \times N$ array with $3 \times 3$ wrapper, and its testbench for $N = 2, 3, 4$ \\
+Piyush & Input buffer, input scheduler, output registers, scheduler testbench \\
+Priyanshu Tomar & Reference model and test data, simulation script, sequential baseline and vector testbench, mutation check, synthesis scripts, block diagrams, README, reports \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ======================================================================
+\section{Conclusion}
+\label{sec:conc}
+SysMAC multiplies signed 8-bit $3 \times 3$ matrices in 10 cycles of latency and 11 cycles per job, against 29 and 30 for a one-multiplier baseline with the same interface. Every timing claim follows from the skew rule $t = i + j + k$, is confirmed cycle by cycle in simulation, and agrees with a published runtime model. Verification against an independent model, together with a mutation check that detects all twelve planted errors, gives strong evidence of correctness, and the mutation check itself found and closed a gap in the original tests. The array's cost is visible in the results: nine multipliers, 42.9\% utilisation for an isolated job, and a likely critical path through the input scheduler. Overlapping jobs, registering the scheduler outputs and a fast inner-product cell are the natural next steps, and Vivado implementation is needed to turn the cycle comparison into a time and area comparison.
+
+\begin{thebibliography}{00}
+\bibitem{kung1978} H. T. Kung and C. E. Leiserson, ``Systolic arrays (for VLSI),'' in \emph{Sparse Matrix Proceedings 1978}, I. S. Duff and G. W. Stewart, Eds. Philadelphia, PA, USA: SIAM, 1979, pp. 256-282.
+\bibitem{kung1982} H. T. Kung, ``Why systolic architectures?,'' \emph{Computer}, vol. 15, no. 1, pp. 37-46, Jan. 1982, doi: 10.1109/MC.1982.1653825.
+\bibitem{jouppi2017} N. P. Jouppi \emph{et al.}, ``In-datacenter performance analysis of a tensor processing unit,'' in \emph{Proc. 44th Annu. Int. Symp. Comput. Archit. (ISCA)}, 2017, pp. 1-12, doi: 10.1145/3079856.3080246.
+\bibitem{tpudocs} Google Cloud, ``TPU system architecture,'' Cloud TPU documentation, 2025. [Online]. Available: https://cloud.google.com/tpu/docs/system-architecture-tpu-vm
+\bibitem{jacob2018} B. Jacob \emph{et al.}, ``Quantization and training of neural networks for efficient integer-arithmetic-only inference,'' in \emph{Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR)}, 2018, pp. 2704-2713, doi: 10.1109/CVPR.2018.00286.
+\bibitem{eyeriss2016} Y.-H. Chen, J. Emer, and V. Sze, ``Eyeriss: A spatial architecture for energy-efficient dataflow for convolutional neural networks,'' in \emph{Proc. 43rd Annu. Int. Symp. Comput. Archit. (ISCA)}, 2016, pp. 367-379, doi: 10.1109/ISCA.2016.40.
+\bibitem{sze2017} V. Sze, Y.-H. Chen, T.-J. Yang, and J. S. Emer, ``Efficient processing of deep neural networks: A tutorial and survey,'' \emph{Proc. IEEE}, vol. 105, no. 12, pp. 2295-2329, Dec. 2017, doi: 10.1109/JPROC.2017.2761740.
+\bibitem{scalesim2018} A. Samajdar, Y. Zhu, P. Whatmough, M. Mattina, and T. Krishna, ``SCALE-Sim: Systolic CNN accelerator simulator,'' arXiv:1811.02883, 2018.
+\bibitem{scalesim2020} A. Samajdar, J. M. Joseph, Y. Zhu, P. Whatmough, M. Mattina, and T. Krishna, ``A systematic methodology for characterizing scalability of DNN accelerators using SCALE-Sim,'' in \emph{Proc. IEEE Int. Symp. Perform. Anal. Syst. Softw. (ISPASS)}, 2020, pp. 58-68.
+\bibitem{scalesim3} R. Raj \emph{et al.}, ``SCALE-Sim v3: A modular cycle-accurate systolic accelerator simulator for end-to-end system analysis,'' arXiv:2504.15377, 2025.
+\bibitem{gemmini2021} H. Genc \emph{et al.}, ``Gemmini: Enabling systematic deep-learning architecture evaluation via full-stack integration,'' in \emph{Proc. 58th ACM/IEEE Design Autom. Conf. (DAC)}, 2021, pp. 769-774, doi: 10.1109/DAC18074.2021.9586216.
+\bibitem{winograd1968} S. Winograd, ``A new algorithm for inner product,'' \emph{IEEE Trans. Comput.}, vol. C-17, no. 7, pp. 693-694, Jul. 1968, doi: 10.1109/TC.1968.227420.
+\bibitem{pogue2024} T. E. Pogue and N. Nicolici, ``Fast inner-product algorithms and architectures for deep neural network accelerators,'' \emph{IEEE Trans. Comput.}, vol. 73, no. 2, pp. 495-509, Feb. 2024, doi: 10.1109/TC.2023.3334140.
+\bibitem{alphatensor} A. Fawzi \emph{et al.}, ``Discovering faster matrix multiplication algorithms with reinforcement learning,'' \emph{Nature}, vol. 610, pp. 47-53, 2022, doi: 10.1038/s41586-022-05172-4.
+\bibitem{alphaevolve} A. Novikov \emph{et al.}, ``AlphaEvolve: A coding agent for scientific and algorithmic discovery,'' arXiv:2506.13131, 2025.
+\bibitem{laderman1976} J. D. Laderman, ``A noncommutative algorithm for multiplying $3 \times 3$ matrices using 23 multiplications,'' \emph{Bull. Amer. Math. Soc.}, vol. 82, no. 1, pp. 126-128, 1976, doi: 10.1090/S0002-9904-1976-13988-2.
+\bibitem{mishra2021} A. Mishra \emph{et al.}, ``Accelerating sparse deep neural networks,'' arXiv:2104.08378, 2021.
+\bibitem{s2ta} Z.-G. Liu, P. N. Whatmough, Y. Zhu, and M. Mattina, ``S2TA: Exploiting structured sparsity for energy-efficient mobile CNN acceleration,'' in \emph{Proc. IEEE Int. Symp. High-Perform. Comput. Archit. (HPCA)}, 2022, arXiv:2107.07983.
+\bibitem{ocpmx} Open Compute Project, ``OCP Microscaling Formats (MX) Specification,'' version 1.0, Sep. 2023.
+\end{thebibliography}
+
+\end{document}
