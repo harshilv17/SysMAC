@@ -2,6 +2,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
+\usepackage{graphicx}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,calc,positioning}
 \usepackage[hidelinks]{hyperref}
@@ -25,7 +26,7 @@
 \maketitle
 
 \begin{abstract}
-This paper describes the design, verification and evaluation of SysMAC, a $3 \times 3$ output-stationary systolic array that multiplies signed 8-bit matrices with 32-bit accumulation, written in Verilog-2001. Rows of one matrix and columns of the other enter the array with a one-cycle skew per row and column, so each cell receives matching operand pairs, and a five-state controller sequences loading, a seven-cycle compute phase and result capture. One multiplication takes 10 clock cycles from start to done, and with back-to-back requests the array completes one every 11 cycles. A sequential design with a single multiply-accumulate unit and the same interface needs 29 and 30 cycles respectively, but the array uses nine multipliers to achieve this and only 42.9\% of its cell-cycles do useful work. Correctness is checked against an independent register-level Python model: all nine testbenches pass, and a mutation check that plants twelve realistic design errors one at a time finds every one; it also exposed a controller error that no testbench caught before. Open-source synthesis maps the array to 9 DSP blocks; its longest logic path runs from the controller through the input scheduler into a processing element. We relate the design to current work on fast inner products, machine-discovered matrix multiplication algorithms and structured sparsity, and show which of these ideas pay off at this size.
+This paper describes the design, verification and evaluation of SysMAC, a $3 \times 3$ output-stationary systolic array that multiplies signed 8-bit matrices with 32-bit accumulation, written in Verilog-2001. Rows of one matrix and columns of the other enter the array with a one-cycle skew per row and column, so each cell receives matching operand pairs, and a five-state controller sequences loading, a seven-cycle compute phase and result capture. One multiplication takes 10 clock cycles from start to done, and with back-to-back requests the array completes one every 11 cycles. A sequential design with a single multiply-accumulate unit and the same interface needs 29 and 30 cycles respectively, but the array uses nine multipliers to achieve this and only 42.9\% of its cell-cycles do useful work. Correctness is checked against an independent register-level Python model: all nine testbenches pass, and a mutation check that plants twelve realistic design errors one at a time finds every one; it also exposed a controller error that no testbench caught before. Open-source synthesis maps the array to 9 DSP blocks. Placed and routed on a Lattice iCE40 HX8K, which has no multiplier blocks, the array reaches 51.2~MHz against 45.6~MHz for the baseline, so it completes a multiplication 3.25 times faster in time, but with 3.6 times the lookup tables; its critical path runs from the controller through the input scheduler into a processing element. We relate the design to current work on fast inner products, machine-discovered matrix multiplication algorithms and structured sparsity, and show which of these ideas pay off at this size.
 \end{abstract}
 
 % ======================================================================
@@ -201,7 +202,14 @@ The baseline evaluates \eqref{eq:matmul} with one MAC unit and three counters, o
 \label{sec:results}
 
 \subsection{Functional correctness}
-All nine testbench runs pass. The demonstration case $A = [[1,2,3],[4,5,6],[7,8,9]]$, $B = [[9,8,7],[6,5,4],[3,2,1]]$ gives $C = [[30,24,18],[84,69,54],[138,114,90]]$. Table~\ref{tab:trace} shows the accumulators of this job after each clock edge, taken from simulation: $c_{00}$ is complete after edge 5 ($t = 2$), while $c_{22}$ completes only on edge 9, which confirms \eqref{eq:when} and the need for the CAPTURE cycle.
+All nine testbench runs pass. The demonstration case $A = [[1,2,3],[4,5,6],[7,8,9]]$, $B = [[9,8,7],[6,5,4],[3,2,1]]$ gives $C = [[30,24,18],[84,69,54],[138,114,90]]$. Table~\ref{tab:trace} shows the accumulators of this job after each clock edge, taken from simulation: $c_{00}$ is complete after edge 5 ($t = 2$), while $c_{22}$ completes only on edge 9, which confirms \eqref{eq:when} and the need for the CAPTURE cycle. Fig.~\ref{fig:wave-sim} shows the same job as recorded by the simulator.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.72\textwidth]{../docs/figures/waveform.pdf}
+\caption{Simulated waveform of the demonstration job, drawn from the testbench's VCD file. Grid lines are rising clock edges. The operands enter skewed by one cycle per row and column; cell $(0,0)$ accumulates $9, 21, 30$ and cell $(2,2)$ finishes last with 90, one edge before CAPTURE.}
+\label{fig:wave-sim}
+\end{figure*}
 
 \begin{table}[t]
 \caption{Accumulators after each clock edge, demonstration job (simulation)}
@@ -276,7 +284,29 @@ LUTs, hierarchical / flattened & 144 / 118 & 408 / 408 \\
 \end{table}
 
 \subsection{Resources and timing}
-Yosys 0.71 \code{synth\_xilinx} reports no latches or structural problems. The flip-flop count depends on the flow: with module boundaries kept, every processing element keeps its forwarding registers, including those at the right and bottom edges that nothing reads (602); flattening removes them (446). The baseline needs more lookup tables than the array, because it selects one of nine operands every cycle. A longest-path analysis of the flattened netlist gives 85 gate levels from the controller's counter $t$, through the scheduler's index arithmetic and operand selection, into the multiply-add of an edge cell. The clock is therefore likely limited by the scheduler and the MAC together rather than by the MAC alone; registering the scheduler outputs would shorten this path for one cycle of latency. Clock frequency and power require Vivado; an out-of-context script is included in the repository, because the top's 436 port bits exceed the user I/O of small Artix-7 packages.
+Yosys 0.71 \code{synth\_xilinx} reports no latches or structural problems. The flip-flop count depends on the flow: with module boundaries kept, every processing element keeps its forwarding registers, including those at the right and bottom edges that nothing reads (602); flattening removes them (446). The baseline needs more lookup tables than the array, because it selects one of nine operands every cycle. A longest-path analysis of the flattened netlist gives 85 gate levels from the controller's counter $t$, through the scheduler's index arithmetic and operand selection, into the multiply-add of an edge cell. The clock is therefore likely limited by the scheduler and the MAC together rather than by the MAC alone; registering the scheduler outputs would shorten this path for one cycle of latency. Artix-7 clock frequency and power require Vivado; an out-of-context script is included in the repository, because the top's 436 port bits exceed the user I/O of small Artix-7 packages.
+
+\emph{Place and route.} To measure the clock frequency with open-source tools, both designs were also synthesised for a Lattice iCE40 HX8K (CT256 package) and placed and routed with nextpnr-ice40 0.11.1 under a 50~MHz constraint. Because the maximum frequency $f_{\max}$ depends on the placer's random seed, we report the median over seeds 1 to 5 (range 46.8--52.3~MHz for the array, 45.3--46.3~MHz for the baseline). The iCE40 has fewer pins than the design has port bits and nextpnr has no out-of-context mode, so for place and route each design sits in a harness that fills $A$ and $B$ from a shift register and shifts $C$ out; every port is registered, so the timed paths lie inside the design. Resource counts are for the bare design. Table~\ref{tab:ice40} lists the results.
+
+\begin{table}[t]
+\caption{Placed and routed on an iCE40 HX8K (50~MHz constraint)}
+\label{tab:ice40}
+\centering
+\begin{tabular}{@{}lrr@{}}
+\toprule
+ & Systolic & Baseline \\
+\midrule
+4-input LUTs (of 7680) & 3256 & 909 \\
+Flip-flops & 830 & 474 \\
+$f_{\max}$, median of 5 seeds (MHz) & 51.2 & 45.6 \\
+Latency, start to done (ns) & 195.4 & 635.8 \\
+Throughput, ns per job & 214.9 & 657.8 \\
+LUTs $\times$ latency (LUT$\cdot\mu$s) & 636 & 578 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The critical path of the array runs from the controller's counter $t$ through the scheduler and the multiply-add into a cell accumulator (19.5~ns for seed~1, 57\% of it routing), which confirms the gate-level analysis above. The baseline's path, through its nine-way operand selection and the multiply-add, is slightly longer (21.9~ns), so the array does not pay for its parallelism with a slower clock. It is therefore 3.25 times faster in latency and 3.06 times faster in throughput, slightly more than the cycle ratios. Without multiplier blocks, however, it needs 3.6 times the lookup tables, and its product of lookup tables and latency is about 10\% higher than the baseline's: at this size the speed-up is bought with a proportional amount of logic, which follows from its 42.9\% utilisation.
 
 \subsection{Discussion: what current research offers at this size}
 \label{sec:discussion}
@@ -289,7 +319,7 @@ Yosys 0.71 \code{synth\_xilinx} reports no latches or structural problems. The f
 \emph{Sparsity and formats.} With an inner dimension of three there is a single padded group of four, so 2:4 sparsity~\cite{mishra2021, s2ta} saves at most one cycle. MXINT8~\cite{ocpmx} would leave the integer array unchanged and add a shared exponent per output.
 
 \subsection{Limitations}
-Results come from RTL simulation and synthesis without timing; Fmax, power and on-board operation are not measured. The array is fixed at $3 \times 3$ at the top level, the parallel 436-bit interface is not realistic for a pin-limited FPGA, and the baseline is a simple counter-based datapath rather than a processor.
+Clock frequency is measured only on the iCE40, a slow device without multiplier blocks, and inside a harness; Artix-7 timing, power and on-board operation are not measured. The array is fixed at $3 \times 3$ at the top level, the parallel 436-bit interface is not realistic for a pin-limited FPGA, and the baseline is a simple counter-based datapath rather than a processor.
 
 % ======================================================================
 \section{Individual Contributions}
@@ -300,7 +330,7 @@ Results come from RTL simulation and synthesis without timing; Fmax, power and o
 Member & Contribution \\
 \midrule
 Abhishek Rana & MAC unit and processing element, with their testbenches \\
-Harshil Valecha & Port specification, controller, top-level integration, controller, system and demonstration testbenches, repository and code review, prototype video \\
+Harshil Valecha & Port specification, controller, top-level integration, controller, system and demonstration testbenches, repository and code review, prototype video, iCE40 place and route and timing analysis, waveform figure, demonstration script \\
 Sushant Yadav & Parameterised $N \times N$ array with $3 \times 3$ wrapper, and its testbench for $N = 2, 3, 4$ \\
 Piyush & Input buffer, input scheduler, output registers, scheduler testbench \\
 Priyanshu Tomar & Reference model and test data, simulation script, sequential baseline and vector testbench, mutation check, synthesis scripts, block diagrams, README, reports \\
@@ -311,7 +341,7 @@ Priyanshu Tomar & Reference model and test data, simulation script, sequential b
 % ======================================================================
 \section{Conclusion}
 \label{sec:conc}
-SysMAC multiplies signed 8-bit $3 \times 3$ matrices in 10 cycles of latency and 11 cycles per job, against 29 and 30 for a one-multiplier baseline with the same interface. Every timing claim follows from the skew rule $t = i + j + k$, is confirmed cycle by cycle in simulation, and agrees with a published runtime model. Verification against an independent model, together with a mutation check that detects all twelve planted errors, gives strong evidence of correctness, and the mutation check itself found and closed a gap in the original tests. The array's cost is visible in the results: nine multipliers, 42.9\% utilisation for an isolated job, and a likely critical path through the input scheduler. Overlapping jobs, registering the scheduler outputs and a fast inner-product cell are the natural next steps, and Vivado implementation is needed to turn the cycle comparison into a time and area comparison.
+SysMAC multiplies signed 8-bit $3 \times 3$ matrices in 10 cycles of latency and 11 cycles per job, against 29 and 30 for a one-multiplier baseline with the same interface. Every timing claim follows from the skew rule $t = i + j + k$, is confirmed cycle by cycle in simulation, and agrees with a published runtime model. Verification against an independent model, together with a mutation check that detects all twelve planted errors, gives strong evidence of correctness, and the mutation check itself found and closed a gap in the original tests. The array's cost is visible in the results: nine multipliers, 42.9\% utilisation for an isolated job, and a likely critical path through the input scheduler. Placed and routed on an iCE40, the array also runs at a slightly higher clock than the baseline and is 3.25 times faster in time, at 3.6 times the logic. Overlapping jobs, registering the scheduler outputs and a fast inner-product cell are the natural next steps, and Vivado implementation on the Artix-7, where the multipliers map to DSP blocks, would complete the time and area comparison.
 
 \begin{thebibliography}{00}
 \bibitem{kung1978} H. T. Kung and C. E. Leiserson, ``Systolic arrays (for VLSI),'' in \emph{Sparse Matrix Proceedings 1978}, I. S. Duff and G. W. Stewart, Eds. Philadelphia, PA, USA: SIAM, 1979, pp. 256-282.
