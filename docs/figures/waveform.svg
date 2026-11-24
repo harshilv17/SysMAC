@@ -1,0 +1,194 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="890" height="374" font-family="Helvetica, Arial, sans-serif" font-size="11">
+<rect width="100%" height="100%" fill="white"/>
+<line x1="160.0" y1="0" x2="160.0" y2="374" stroke="#ddd"/>
+<line x1="220.0" y1="0" x2="220.0" y2="374" stroke="#ddd"/>
+<line x1="280.0" y1="0" x2="280.0" y2="374" stroke="#ddd"/>
+<line x1="340.0" y1="0" x2="340.0" y2="374" stroke="#ddd"/>
+<line x1="400.0" y1="0" x2="400.0" y2="374" stroke="#ddd"/>
+<line x1="460.0" y1="0" x2="460.0" y2="374" stroke="#ddd"/>
+<line x1="520.0" y1="0" x2="520.0" y2="374" stroke="#ddd"/>
+<line x1="580.0" y1="0" x2="580.0" y2="374" stroke="#ddd"/>
+<line x1="640.0" y1="0" x2="640.0" y2="374" stroke="#ddd"/>
+<line x1="700.0" y1="0" x2="700.0" y2="374" stroke="#ddd"/>
+<line x1="760.0" y1="0" x2="760.0" y2="374" stroke="#ddd"/>
+<line x1="820.0" y1="0" x2="820.0" y2="374" stroke="#ddd"/>
+<line x1="880.0" y1="0" x2="880.0" y2="374" stroke="#ddd"/>
+<text x="4" y="18">clk</text>
+<line x1="130.0" y1="22" x2="160.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="130.0" y1="6" x2="130.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="160.0" y1="6" x2="190.0" y2="6" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="160.0" y1="6" x2="160.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="190.0" y1="22" x2="220.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="190.0" y1="6" x2="190.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="220.0" y1="6" x2="250.0" y2="6" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="220.0" y1="6" x2="220.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="250.0" y1="22" x2="280.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="250.0" y1="6" x2="250.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="280.0" y1="6" x2="310.0" y2="6" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="280.0" y1="6" x2="280.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="310.0" y1="22" x2="340.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="310.0" y1="6" x2="310.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="340.0" y1="6" x2="370.0" y2="6" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="340.0" y1="6" x2="340.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="370.0" y1="22" x2="400.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="370.0" y1="6" x2="370.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="400.0" y1="6" x2="430.0" y2="6" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="400.0" y1="6" x2="400.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="430.0" y1="22" x2="460.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="430.0" y1="6" x2="430.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="460.0" y1="6" x2="490.0" y2="6" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="460.0" y1="6" x2="460.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="490.0" y1="22" x2="520.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="490.0" y1="6" x2="490.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="520.0" y1="6" x2="550.0" y2="6" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="520.0" y1="6" x2="520.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="550.0" y1="22" x2="580.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="550.0" y1="6" x2="550.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="580.0" y1="6" x2="610.0" y2="6" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="580.0" y1="6" x2="580.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="610.0" y1="22" x2="640.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="610.0" y1="6" x2="610.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="640.0" y1="6" x2="670.0" y2="6" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="640.0" y1="6" x2="640.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="670.0" y1="22" x2="700.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="670.0" y1="6" x2="670.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="700.0" y1="6" x2="730.0" y2="6" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="700.0" y1="6" x2="700.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="730.0" y1="22" x2="760.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="730.0" y1="6" x2="730.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="760.0" y1="6" x2="790.0" y2="6" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="760.0" y1="6" x2="760.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="790.0" y1="22" x2="820.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="790.0" y1="6" x2="790.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="820.0" y1="6" x2="850.0" y2="6" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="820.0" y1="6" x2="820.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="850.0" y1="22" x2="880.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="850.0" y1="6" x2="850.0" y2="22" stroke="#1a5fb4" stroke-width="1.5"/>
+<text x="4" y="44">start</text>
+<line x1="130.0" y1="48" x2="190.0" y2="48" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="130.0" y1="32" x2="130.0" y2="48" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="190.0" y1="32" x2="250.0" y2="32" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="190.0" y1="32" x2="190.0" y2="48" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="250.0" y1="48" x2="880.0" y2="48" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="250.0" y1="32" x2="250.0" y2="48" stroke="#1a5fb4" stroke-width="1.5"/>
+<text x="4" y="70">load</text>
+<line x1="130.0" y1="74" x2="220.0" y2="74" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="130.0" y1="58" x2="130.0" y2="74" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="220.0" y1="58" x2="280.0" y2="58" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="220.0" y1="58" x2="220.0" y2="74" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="280.0" y1="74" x2="880.0" y2="74" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="280.0" y1="58" x2="280.0" y2="74" stroke="#1a5fb4" stroke-width="1.5"/>
+<text x="4" y="96">run</text>
+<line x1="130.0" y1="100" x2="280.0" y2="100" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="130.0" y1="84" x2="130.0" y2="100" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="280.0" y1="84" x2="700.0" y2="84" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="280.0" y1="84" x2="280.0" y2="100" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="700.0" y1="100" x2="880.0" y2="100" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="700.0" y1="84" x2="700.0" y2="100" stroke="#1a5fb4" stroke-width="1.5"/>
+<text x="4" y="122">t</text>
+<polygon points="130.0,118.0 133.0,110 337.0,110 340.0,118.0 337.0,126 133.0,126" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="235.0" y="122" text-anchor="middle">0</text>
+<polygon points="340.0,118.0 343.0,110 397.0,110 400.0,118.0 397.0,126 343.0,126" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="370.0" y="122" text-anchor="middle">1</text>
+<polygon points="400.0,118.0 403.0,110 457.0,110 460.0,118.0 457.0,126 403.0,126" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="430.0" y="122" text-anchor="middle">2</text>
+<polygon points="460.0,118.0 463.0,110 517.0,110 520.0,118.0 517.0,126 463.0,126" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="490.0" y="122" text-anchor="middle">3</text>
+<polygon points="520.0,118.0 523.0,110 577.0,110 580.0,118.0 577.0,126 523.0,126" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="550.0" y="122" text-anchor="middle">4</text>
+<polygon points="580.0,118.0 583.0,110 637.0,110 640.0,118.0 637.0,126 583.0,126" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="610.0" y="122" text-anchor="middle">5</text>
+<polygon points="640.0,118.0 643.0,110 877.0,110 880.0,118.0 877.0,126 643.0,126" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="760.0" y="122" text-anchor="middle">6</text>
+<text x="4" y="148">valid_a_in</text>
+<polygon points="130.0,144.0 133.0,136 277.0,136 280.0,144.0 277.0,152 133.0,152" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="205.0" y="148" text-anchor="middle">000</text>
+<polygon points="280.0,144.0 283.0,136 337.0,136 340.0,144.0 337.0,152 283.0,152" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="310.0" y="148" text-anchor="middle">001</text>
+<polygon points="340.0,144.0 343.0,136 397.0,136 400.0,144.0 397.0,152 343.0,152" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="370.0" y="148" text-anchor="middle">011</text>
+<polygon points="400.0,144.0 403.0,136 457.0,136 460.0,144.0 457.0,152 403.0,152" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="430.0" y="148" text-anchor="middle">111</text>
+<polygon points="460.0,144.0 463.0,136 517.0,136 520.0,144.0 517.0,152 463.0,152" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="490.0" y="148" text-anchor="middle">110</text>
+<polygon points="520.0,144.0 523.0,136 577.0,136 580.0,144.0 577.0,152 523.0,152" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="550.0" y="148" text-anchor="middle">100</text>
+<polygon points="580.0,144.0 583.0,136 877.0,136 880.0,144.0 877.0,152 583.0,152" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="730.0" y="148" text-anchor="middle">000</text>
+<text x="4" y="174">a_in rows 0,1,2</text>
+<polygon points="130.0,170.0 133.0,162 277.0,162 280.0,170.0 277.0,178 133.0,178" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="205.0" y="174" text-anchor="middle">0,0,0</text>
+<polygon points="280.0,170.0 283.0,162 337.0,162 340.0,170.0 337.0,178 283.0,178" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="310.0" y="174" text-anchor="middle">1,0,0</text>
+<polygon points="340.0,170.0 343.0,162 397.0,162 400.0,170.0 397.0,178 343.0,178" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="370.0" y="174" text-anchor="middle">2,4,0</text>
+<polygon points="400.0,170.0 403.0,162 457.0,162 460.0,170.0 457.0,178 403.0,178" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="430.0" y="174" text-anchor="middle">3,5,7</text>
+<polygon points="460.0,170.0 463.0,162 517.0,162 520.0,170.0 517.0,178 463.0,178" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="490.0" y="174" text-anchor="middle">0,6,8</text>
+<polygon points="520.0,170.0 523.0,162 577.0,162 580.0,170.0 577.0,178 523.0,178" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="550.0" y="174" text-anchor="middle">0,0,9</text>
+<polygon points="580.0,170.0 583.0,162 877.0,162 880.0,170.0 877.0,178 583.0,178" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="730.0" y="174" text-anchor="middle">0,0,0</text>
+<text x="4" y="200">b_in cols 0,1,2</text>
+<polygon points="130.0,196.0 133.0,188 277.0,188 280.0,196.0 277.0,204 133.0,204" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="205.0" y="200" text-anchor="middle">0,0,0</text>
+<polygon points="280.0,196.0 283.0,188 337.0,188 340.0,196.0 337.0,204 283.0,204" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="310.0" y="200" text-anchor="middle">9,0,0</text>
+<polygon points="340.0,196.0 343.0,188 397.0,188 400.0,196.0 397.0,204 343.0,204" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="370.0" y="200" text-anchor="middle">6,8,0</text>
+<polygon points="400.0,196.0 403.0,188 457.0,188 460.0,196.0 457.0,204 403.0,204" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="430.0" y="200" text-anchor="middle">3,5,7</text>
+<polygon points="460.0,196.0 463.0,188 517.0,188 520.0,196.0 517.0,204 463.0,204" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="490.0" y="200" text-anchor="middle">0,2,4</text>
+<polygon points="520.0,196.0 523.0,188 577.0,188 580.0,196.0 577.0,204 523.0,204" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="550.0" y="200" text-anchor="middle">0,0,1</text>
+<polygon points="580.0,196.0 583.0,188 877.0,188 880.0,196.0 877.0,204 583.0,204" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="730.0" y="200" text-anchor="middle">0,0,0</text>
+<text x="4" y="226">acc PE(0,0)</text>
+<polygon points="130.0,222.0 133.0,214 337.0,214 340.0,222.0 337.0,230 133.0,230" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="235.0" y="226" text-anchor="middle">0</text>
+<polygon points="340.0,222.0 343.0,214 397.0,214 400.0,222.0 397.0,230 343.0,230" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="370.0" y="226" text-anchor="middle">9</text>
+<polygon points="400.0,222.0 403.0,214 457.0,214 460.0,222.0 457.0,230 403.0,230" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="430.0" y="226" text-anchor="middle">21</text>
+<polygon points="460.0,222.0 463.0,214 877.0,214 880.0,222.0 877.0,230 463.0,230" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="670.0" y="226" text-anchor="middle">30</text>
+<text x="4" y="252">acc PE(1,1)</text>
+<polygon points="130.0,248.0 133.0,240 457.0,240 460.0,248.0 457.0,256 133.0,256" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="295.0" y="252" text-anchor="middle">0</text>
+<polygon points="460.0,248.0 463.0,240 517.0,240 520.0,248.0 517.0,256 463.0,256" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="490.0" y="252" text-anchor="middle">32</text>
+<polygon points="520.0,248.0 523.0,240 577.0,240 580.0,248.0 577.0,256 523.0,256" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="550.0" y="252" text-anchor="middle">57</text>
+<polygon points="580.0,248.0 583.0,240 877.0,240 880.0,248.0 877.0,256 583.0,256" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="730.0" y="252" text-anchor="middle">69</text>
+<text x="4" y="278">acc PE(2,2)</text>
+<polygon points="130.0,274.0 133.0,266 577.0,266 580.0,274.0 577.0,282 133.0,282" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="355.0" y="278" text-anchor="middle">0</text>
+<polygon points="580.0,274.0 583.0,266 637.0,266 640.0,274.0 637.0,282 583.0,282" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="610.0" y="278" text-anchor="middle">49</text>
+<polygon points="640.0,274.0 643.0,266 697.0,266 700.0,274.0 697.0,282 643.0,282" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="670.0" y="278" text-anchor="middle">81</text>
+<polygon points="700.0,274.0 703.0,266 877.0,266 880.0,274.0 877.0,282 703.0,282" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="790.0" y="278" text-anchor="middle">90</text>
+<text x="4" y="304">capture</text>
+<line x1="130.0" y1="308" x2="700.0" y2="308" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="130.0" y1="292" x2="130.0" y2="308" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="700.0" y1="292" x2="760.0" y2="292" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="700.0" y1="292" x2="700.0" y2="308" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="760.0" y1="308" x2="880.0" y2="308" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="760.0" y1="292" x2="760.0" y2="308" stroke="#1a5fb4" stroke-width="1.5"/>
+<text x="4" y="330">done</text>
+<line x1="130.0" y1="334" x2="760.0" y2="334" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="130.0" y1="318" x2="130.0" y2="334" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="760.0" y1="318" x2="820.0" y2="318" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="760.0" y1="318" x2="760.0" y2="334" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="820.0" y1="334" x2="880.0" y2="334" stroke="#1a5fb4" stroke-width="1.5"/>
+<line x1="820.0" y1="318" x2="820.0" y2="334" stroke="#1a5fb4" stroke-width="1.5"/>
+<text x="4" y="356">C[0][0], C[2][2]</text>
+<polygon points="130.0,352.0 133.0,344 757.0,344 760.0,352.0 757.0,360 133.0,360" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="445.0" y="356" text-anchor="middle">0, 0</text>
+<polygon points="760.0,352.0 763.0,344 877.0,344 880.0,352.0 877.0,360 763.0,360" fill="#eef3fb" stroke="#1a5fb4"/>
+<text x="820.0" y="356" text-anchor="middle">30, 90</text>
+</svg>

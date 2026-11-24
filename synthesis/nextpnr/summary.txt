@@ -1,0 +1,6 @@
+Yosys 0.71+post synth_ice40 + nextpnr-ice40, iCE40 HX8K CT256, 50 MHz constraint
+Fmax: median (and range) over placement seeds 1,2,3,4,5. Area x time in LUT4 x us.
+
+design                       LUT4    FF  carry Fmax_MHz     range_MHz  cycles      ns   area_x_t
+systolic_accelerator_top     3256   830    259    51.18   46.81-52.33      10   195.4        636
+seq_matmul                    909   474     39    45.61   45.28-46.31      29   635.8        578
